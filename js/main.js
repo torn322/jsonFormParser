@@ -1,11 +1,7 @@
 $(document).ready(function () {
 
-    function getJson() {
 
-    }
-
-
-    $(document).on('input', 'input', function () {
+    $(document).on('input', 'input[type=tel]', function () {
         const mask = $(this).data('mask')
         const regExpTemplate = mask.replaceAll('(', '').replaceAll(')', '').replaceAll('-', ')(').replaceAll(' ', ')(').replace(/$/, ')').replace(/^/, '(').replace(/\+/, '').replaceAll(/[0-9]/g, '[0-9]')
         console.log(regExpTemplate)
@@ -39,7 +35,7 @@ $(document).ready(function () {
             const pattern = (element.input.type == 'tel') ? 'pattern="[0-9\-]+"' : String()
             const html =
                 `<div class="form-group">
-                    <label for="field-${id}">${element.label}</label>
+                    ${element.label ? `<label for="field-${id}">${element.label}</label>` : String()}
                     <input type="${element.input.type}" class="form-control" id="field-${id}" ${this.checkRequired(element)} ${placeholder} ${mask} ${pattern} ${maxLength}>
                 </div>`
             return html
@@ -49,9 +45,10 @@ $(document).ready(function () {
             const multiple = element.input.multiple ? 'multiple' : String()
             const accept = element.input.filetype ? `accept="${element.input.filetype.join(', ')}"` : String()
             const html =
-                `<div class="form-group">
-                    <label for="field-${id}">${element.label}</label>
-                    <input type="${element.input.type}" class="form-control-file" id="field-${id}" ${accept} ${multiple} ${this.checkRequired(element)}>
+                `<div class="custom-file">
+                    <input type="file" class="custom-file-input" id="field-${id}"
+                      aria-describedby="inputGroupFileAddon01" ${accept} ${multiple} ${this.checkRequired(element)}>
+                    <label class="custom-file-label" for="field-${id}">${element.label}</label>
                 </div>`
             return html
         },
@@ -70,10 +67,52 @@ $(document).ready(function () {
             const html =
                 `<div class="form-group form-check">
                     <input type="${element.input.type}" class="form-check-input" id="field-${id}" ${this.checkRequired(element)} ${checked}>
+                    <label class="form-check-label" for="${id}">${element.label}</label>
                 </div>`
             return html
         },
 
+        
+        technology(element) {
+            const id = this.getId()
+            const multiple = element.input.multiple ? 'multiple' : String()
+            
+            let options = String()
+            element.input.technologies.forEach(item => {
+                options += `<option>${item}</option>`
+            })
+            
+            const html = 
+                `<div class="form-group">
+                    <label for="field-${id}">${element.label}</label>
+                    <select class="form-control" id="field-${id}" ${multiple} ${this.checkRequired(element)}>
+                        ${options}
+                    </select>
+                </div>`
+            
+            return html
+        },
+
+        color(element) {
+            const id = this.getId()
+            let colors = String()
+
+            element.input.colors.forEach(item => {
+                colors += `<option value="${item}">`
+            })
+
+            const html = 
+                `<label for="field-${id}">${element.label}</label> 
+                <input type="color" name="" class="form-control" id="field-${id}" list="list-${id}">
+                <datalist id="list-${id}">
+                    ${colors}
+                </datalist>`
+            return html
+        },
+
+        password(e) {
+            return this.default(e)
+        },
         number(e) {
             e.input.type = 'tel'
             return this.default(e)
@@ -87,26 +126,6 @@ $(document).ready(function () {
         date(e) {
             return this.default(e)
         },
-
-        technology(element) {
-            const id = this.getId()
-            const multiple = element.input.multiple ? 'multiple' : String()
-
-            let options = String()
-            element.input.technologies.forEach(item => {
-                options += `<option>${item}</option>`
-            })
-
-            const html = 
-                `<div class="form-group">
-                    <label for="field-${id}">${element.label}</label>
-                    <select class="form-control" id="field-${id}" ${multiple} ${this.checkRequired(element)}>
-                        ${options}
-                    </select>
-                </div>`
-            
-            return html
-        }
     }
 
 
@@ -121,8 +140,8 @@ $(document).ready(function () {
                     const checked = (element.input.checked == 'true') ? 'checked' : String()
                     html += `<input class="form-check-input" type="checkbox" id="${id}" ${checked} ${input.checkRequired(element)}>`
                 } else {
-                    html += `<label class="form-check-label" for="${id}">${element['text without ref']}</label>`
-                    html += `<a href="${element.ref}">${element.text}</a>`
+                    html += element['text without ref'] ? `<label class="form-check-label" for="${id}">${element['text without ref']}</label>` : String()
+                    html += `<a href="${element.ref}" class="form-link">${element.text}</a>`
                 }
             })
             return `<div class="form-check">${html}</div>`
@@ -130,8 +149,12 @@ $(document).ready(function () {
     }
 
     const button = {
-        handle(element) {
-            return `<button type="button" class="btn btn-primary">${element.text}</button>`
+        handle(buttons) {
+            let html = String()
+            buttons.forEach(element => {
+                html += `<button type="button" class="btn btn-primary">${element.text}</button>`
+            });
+            return `<div class="btn-wrap">${html}</div>`
         }
     }
 
@@ -140,7 +163,7 @@ $(document).ready(function () {
 
 
 
-    $('#btn').click(() => {
+    $('#parse').click(() => {
         let file = document.getElementById('file').files[0]
 
         console.log(file)
@@ -152,27 +175,28 @@ $(document).ready(function () {
         reader.onload = () => {
             const formJSON = JSON.parse(reader.result)
             let formHTML = String()
-            console.log(formJSON)
+            
+            $('#formResult').attr('name', formJSON.name)
 
             formJSON.fields.forEach(element => {
                 formHTML += input[element.input.type](element)
             });
+            
+            if (formJSON.references) {
+                formHTML += ref.handle(formJSON.references)
+            }
+            if (formJSON.buttons) {
+                formHTML += button.handle(formJSON.buttons)
+            }
 
-            // formJSON.references.forEach(element => {
-            //     if (element.input) {
-            //         formHTML += input[element.input.type](element)
-            //     } else {
-
-            //     }
-            // })
-
-            formHTML += ref.handle(formJSON.references)
-
-            formJSON.buttons.forEach(element => {
-                formHTML += button.handle(element)
-            });
-
-            $('form').html(formHTML)
+            $('#formResult').html(formHTML)
         }
+    })
+
+    $('#reset').click(() => {
+        $('#formResult').html(
+            `<div class="alert alert-info m-0" role="alert">
+                Your form will be here.
+            </div>`)
     })
 })

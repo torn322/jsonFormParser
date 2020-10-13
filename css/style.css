@@ -1,0 +1,49 @@
+form {
+  margin-top: 50px;
+  padding: 20px;
+  -webkit-box-shadow: 0 0 20px #d3d3d3;
+          box-shadow: 0 0 20px #d3d3d3;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+.btn {
+  height: -webkit-max-content;
+  height: -moz-max-content;
+  height: max-content;
+}
+
+.custom-file {
+  margin: 16px 0;
+}
+
+.form-check {
+  width: -webkit-max-content;
+  width: -moz-max-content;
+  width: max-content;
+  margin: 16px auto 16px auto;
+}
+
+.form-check-label {
+  margin: 0 5px;
+}
+
+.btn-wrap {
+  margin: 0 auto;
+  width: -webkit-max-content;
+  width: -moz-max-content;
+  width: max-content;
+}
+
+.btn-wrap .btn {
+  margin-right: 20px;
+}
+
+.form-link {
+  margin-right: 20px;
+}
+
+section {
+  padding: 50px 0;
+}
+/*# sourceMappingURL=style.css.map */
