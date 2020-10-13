@@ -7,7 +7,7 @@ $(document).ready(function () {
 
     $(document).on('input', 'input', function () {
         const mask = $(this).data('mask')
-        const regExpTemplate = mask.replaceAll('(', '').replaceAll(')', '').replaceAll('-', ')(').replaceAll(' ', ')(').replace(/$/, ')').replace(/^/, '(').replaceAll(/[0-9]/g, '[0-9]').replace(/\+[0-9]/, '\+[0-9]')
+        const regExpTemplate = mask.replaceAll('(', '').replaceAll(')', '').replaceAll('-', ')(').replaceAll(' ', ')(').replace(/$/, ')').replace(/^/, '(').replace(/\+/, '').replaceAll(/[0-9]/g, '[0-9]')
         console.log(regExpTemplate)
         let insertTemplate = mask.replaceAll(/[0-9]+/g, '#')
 
@@ -35,11 +35,12 @@ $(document).ready(function () {
             const id = this.getId()
             const placeholder = element.input.placeholder ? `placeholder="${element.input.placeholder}"` : String()
             const mask = element.input.mask ? `data-mask="${element.input.mask}"` : String()
+            const maxLength = element.input.mask ? `maxLength="${element.input.mask.length}"` : String()
             const pattern = (element.input.type == 'tel') ? 'pattern="[0-9\-]+"' : String()
             const html =
                 `<div class="form-group">
                     <label for="field-${id}">${element.label}</label>
-                    <input type="${element.input.type}" class="form-control" id="field-${id}" ${this.checkRequired(element)} ${placeholder} ${mask} ${pattern}>
+                    <input type="${element.input.type}" class="form-control" id="field-${id}" ${this.checkRequired(element)} ${placeholder} ${mask} ${pattern} ${maxLength}>
                 </div>`
             return html
         },
