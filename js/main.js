@@ -1,24 +1,28 @@
 $(document).ready(function () {
 
 
-    $(document).on('input', 'input[type=tel]', function () {
-        const mask = $(this).data('mask')
-        const regExpTemplate = mask.replaceAll('(', '').replaceAll(')', '').replaceAll('-', ')(').replaceAll(' ', ')(').replace(/$/, ')').replace(/^/, '(').replace(/\+/, '').replaceAll(/[0-9]/g, '[0-9]')
-        console.log(regExpTemplate)
-        let insertTemplate = mask.replaceAll(/[0-9]+/g, '#')
+    // $(document).on('input', 'input[type=tel]', function () {
+    //     const mask = $(this).data('mask')
+    //     const regExpTemplate = mask.replaceAll('(', '').replaceAll(')', '').replaceAll('-', ')(').replaceAll(' ', ')(').replace(/$/, ')').replace(/^/, '(').replace(/\+/, '').replaceAll(/[0-9]/g, '[0-9]')
+    //     console.log(regExpTemplate)
+    //     let insertTemplate = mask.replaceAll(/[0-9]+/g, '#')
 
-        let index = 1
-        while (insertTemplate.search('#') + 1) {
-            insertTemplate = insertTemplate.replace('#', '$' + index)
-            index++
-        }
+    //     let index = 1
+    //     while (insertTemplate.search('#') + 1) {
+    //         insertTemplate = insertTemplate.replace('#', '$' + index)
+    //         index++
+    //     }
 
-        const re = new RegExp(regExpTemplate)
+    //     const re = new RegExp(regExpTemplate)
 
-        $(this).val($(this).val().replace(re, insertTemplate))
-    })
+    //     $(this).val($(this).val().replace(re, insertTemplate))
+    // })
+
+
 
     const input = {
+        masks: new Array(),
+
         checkRequired(element) {
             if (element.input.required) {
                 return 'required'
@@ -29,15 +33,25 @@ $(document).ready(function () {
         },
         default (element) {
             const id = this.getId()
+
             const placeholder = element.input.placeholder ? `placeholder="${element.input.placeholder}"` : String()
-            const mask = element.input.mask ? `data-mask="${element.input.mask}"` : String()
-            const maxLength = element.input.mask ? `maxLength="${element.input.mask.length}"` : String()
+            // const mask = element.input.mask ? `data-has_mask="true" data-mask="${element.input.mask}"` : String()
+            // const maxLength = element.input.mask ? `maxLength="${element.input.mask.length}"` : String()
             const pattern = (element.input.type == 'tel') ? 'pattern="[0-9\-]+"' : String()
+
             const html =
                 `<div class="form-group">
                     ${element.label ? `<label for="field-${id}">${element.label}</label>` : String()}
-                    <input type="${element.input.type}" class="form-control" id="field-${id}" ${this.checkRequired(element)} ${placeholder} ${mask} ${pattern} ${maxLength}>
+                    <input type="${element.input.type}" class="form-control" id="field-${id}" ${this.checkRequired(element)} ${placeholder} ${pattern} >
                 </div>`
+
+            if (element.input.mask) {
+                this.masks.push({
+                    fieldId: id,
+                    mask: element.input.mask
+                })
+            }
+            
             return html
         },
         file(element) {
@@ -190,6 +204,11 @@ $(document).ready(function () {
             }
 
             $('#formResult').html(formHTML)
+            
+            input.masks.forEach(element => {
+                $(`#field-${element.fieldId}`).mask(element.mask);
+            })
+
         }
     })
 
